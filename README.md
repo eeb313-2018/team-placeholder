@@ -1,1 +1,17 @@
 # team-placeholder
+
+# Introduction to the project
+Our project is about how important life history traits affect diversification rates of mammals. The goal of the project to use statistical methods to test these effects and to see if there are any interactions between life history traits in regards to their effect on diversification. This could provide insight into evolutionary processes and how they can differ between mammal groups.
+
+# Description of the data
+This data set is about characteristics that are related to life history for a variety of mammalian species. We will probably use variables such as Gestation time in months, Maximum life span in months, adult body mass in grams, and litters per year to investigate the relationship and interractions of these important traits. The data set we will use was a meta-analysis of previous literature and data sources which are documented for each species. 
+*Life History Characteristics of Placental Non-Volant Mammals. S. K. Morgan Ernest. 2003. Life history characteristics of placental non-volant mammals. Ecology 84:3402* (http://www.esapubs.org/archive/ecol/E084/093/Mammal_lifehistories_v2.txt)
+
+# Team description
+Biography of team member:
+Daire Crawford:
+Kyra Fine:
+Ruxin Liu: 
+Hanatu Tak:
+Team roles:
+# Installation instructions
