@@ -10,6 +10,7 @@ This data set is about characteristics that are related to life history for a va
 
 # Team description
 Biography of team members:
+
 - Daire Crawford: Good with correlations and plotting, comfortable with figure captions and technical terms 
 - Kyra Fine: Good with analysis pipelines and communicative writing (e.g. explaining the results and discussion) 
 - Ruxin Liu: Good with Statistics, having some background knowledge anot statistics and enjoy programing in R 
@@ -18,5 +19,6 @@ Biography of team members:
 Team roles: First Meeting- Daire: Recorder (1) Kyra: Organizer (2) Hanatu and Ruxin: Facilitators (3,4)
 
 Positions will be rotated numerically (i.e. position 1, recorder, will move to position 2, organizer, for the next meeting. Position 3 will become position 4, and 4 will cycle back to position 1, etc.).
+
 
 # Installation instructions
