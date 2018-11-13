@@ -2,7 +2,7 @@
 
 We decided that we would treat each other with respect, finish our assigned work,
 contribute to the project to the best of our abilities, be on time for our meetings,
-and communicate clearly and promptly with each other.
+and communicate clearly and promptly with each other, especially if conflict arises.
 
 We also agree with every point made in the Contributor Covenant Code of Conduct, 
 which we have listed below for reference. 
@@ -65,11 +65,11 @@ further defined and clarified by project maintainers.
 ## Enforcement
 
 Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported by contacting the project team at [INSERT EMAIL ADDRESS]. All
-complaints will be reviewed and investigated and will result in a response that
-is deemed necessary and appropriate to the circumstances. The project team is
-obligated to maintain confidentiality with regard to the reporter of an incident.
-Further details of specific enforcement policies may be posted separately.
+reported by contacting the project team in class. All complaints will be 
+reviewed and investigated and will result in a response that is deemed necessary 
+and appropriate to the circumstances. The project team is obligated to maintain 
+confidentiality with regard to the reporter of an incident. Further details of 
+specific enforcement policies may be posted separately.
 
 Project maintainers who do not follow or enforce the Code of Conduct in good
 faith may face temporary or permanent repercussions as determined by other
