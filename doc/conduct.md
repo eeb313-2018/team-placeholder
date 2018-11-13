@@ -2,7 +2,7 @@
 
 We decided that we would treat each other with respect, finish our assigned work,
 contribute to the project to the best of our abilities, be on time for our meetings,
-and communicate clearly and promptly with each other.
+and communicate clearly and promptly with each other, especially if conflict arises.
 
 We also agree with every point made in the Contributor Covenant Code of Conduct, 
 which we have listed below for reference. 
