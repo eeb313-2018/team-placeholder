@@ -1,0 +1,112 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r}
+mammals <- Mammal_lifehistories_v2
+```
+
+```{r}
+library(tidyverse)
+mammals
+```
+
+```{r}
+qplot(data = mammals, x = newborn.g., y = max..life.mo.)
+```
+```{r}
+qplot(data = mammals, x = litter.size, y = max..life.mo.) + coord_cartesian(xlim = c(0,50), ylim = c(0,1000))
+```
+
+```{r}
+qplot(data = mammals, x = litter.size, y = max..life.mo.) + coord_cartesian(xlim = c(0,50), ylim = c(0,1000))
+```
+
+```{r}
+colnames(mammals)[colnames(mammals)=="litters.year"] <- "litters_per_year"
+
+mammals <- mammals %>% 
+  mutate(litters_per_year = ifelse(litters_per_year == -999.00, NA, litters_per_year))
+```
+
+```{r}
+write.csv(mammals, "mammals_clean.csv")
+```
+
+```{r}
+mammals %>%
+  group_by(order) %>% 
+  tally()
+```
+```{r}
+mammals <- head(mammals, 1440)
+```
+
+
+```{r}
+mammals2 <- mammals %>%
+  group_by(order) %>% 
+  summarize(order_size = n_distinct(species), mass_g = mean(mass_g, na.rm = TRUE),
+            gestation_mo = mean(gestation_mo, na.rm = TRUE),
+            newborn_g = mean(newborn_g, na.rm = TRUE),
+            weaning_mo = mean(weaning_mo, na.rm = TRUE),
+            wean_g = mean(wean_g, na.rm = TRUE),
+            afr_mo = mean(afr_mo, na.rm = TRUE),
+            life_mo = mean(life_mo, na.rm = TRUE),
+            litter_size = mean(litter_size, na.rm = TRUE),
+            litters_per_year = mean(litters_per_year, na.rm = TRUE))
+```
+
+```{r}
+qplot(data = mammals2, x = order_size, y = gestation_mo)
+```
+
+```{r}
+qplot(data = mammals2, x = order_size, y = newborn_g)
+```
+
+```{r}
+qplot(data = mammals2, x = order_size, y = weaning_mo)
+```
+
+```{r}
+qplot(data = mammals2, x = order_size, y = mass_g)
+```
+
+```{r}
+qplot(data = mammals2, x = order_size, y = litter_size)
+```
+
+```{r}
+qplot(data = mammals2, x = order_size, y = litters_per_year)
+```
+
+```{r}
+mammals3 <- mammals %>%
+  group_by(Genus) %>% 
+  summarize(genus_size = n_distinct(species), mass_g = mean(mass_g, na.rm = TRUE),
+            gestation_mo = mean(gestation_mo, na.rm = TRUE),
+            newborn_g = mean(newborn_g, na.rm = TRUE),
+            weaning_mo = mean(weaning_mo, na.rm = TRUE),
+            wean_g = mean(wean_g, na.rm = TRUE),
+            afr_mo = mean(afr_mo, na.rm = TRUE),
+            life_mo = mean(life_mo, na.rm = TRUE),
+            litter_size = mean(litter_size, na.rm = TRUE),
+            litters_per_year = mean(litters_per_year, na.rm = TRUE))
+```
+
+```{r}
+qplot(data = mammals3, x = genus_size, y = gestation_mo)
+```
+
+```{r}
+result <- lm(genus_size~gestation_mo, data=mammals3)
+summary(result)
+```
+
+```{r}
+write.csv(mammals2, "mammals_order.csv")
+write.csv(mammals3, "mammals_genus.csv")
+```
+
