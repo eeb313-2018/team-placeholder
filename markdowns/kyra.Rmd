@@ -4,12 +4,11 @@ output: html_document
 ---
 
 ```{r}
-mammals <- Mammal_lifehistories_v2
-```
+mammals_c <- read.csv('mammals_clean.csv')
+mammals_g <- read.csv('mammals_genus.csv')
+mammals_o <- read.csv('mammals_order.csv')
 
-```{r}
 library(tidyverse)
-mammals
 ```
 
 ```{r}
@@ -97,7 +96,7 @@ mammals3 <- mammals %>%
 ```
 
 ```{r}
-qplot(data = mammals3, x = genus_size, y = gestation_mo)
+qplot(data = mammals_g, x = genus_size, y = gestation_mo)
 ```
 
 ```{r}
@@ -109,4 +108,60 @@ summary(result)
 write.csv(mammals2, "mammals_order.csv")
 write.csv(mammals3, "mammals_genus.csv")
 ```
+
+#statistical analysis for gestation mass
+
+```{r}
+result <- lm(genus_size~gestation_mo, data=mammals_g)
+summary(result)
+```
+
+```{r}
+reshuffled <- mammals_c
+reshuffled$gestation_mo <- sample(reshuffled$gestation_mo, size = nrow(reshuffled), replace = FALSE)
+
+slope_real <- coef(result)["gestation_mo"]
+
+simulated_slopes <- list()
+
+nreps = 5000 # 5000 iterations
+
+for(i in 1:nreps){
+    
+    reshuffled <- mammals_c
+    reshuffled$gestation_mo <- sample(reshuffled$gestation_mo, size = nrow(reshuffled),
+                                      replace = FALSE)
+    
+    # Calculate the slope
+    genus_temp <- reshuffled %>%
+          group_by(Genus) %>% 
+          summarize(genus_size = n_distinct(species), mass_g = mean(mass_g, na.rm = TRUE),
+                    gestation_mo = mean(gestation_mo, na.rm = TRUE),
+                    newborn_g = mean(newborn_g, na.rm = TRUE),
+                    weaning_mo = mean(weaning_mo, na.rm = TRUE),
+                    wean_g = mean(wean_g, na.rm = TRUE),
+                    afr_mo = mean(afr_mo, na.rm = TRUE),
+                    life_mo = mean(life_mo, na.rm = TRUE),
+                    litter_size = mean(litter_size, na.rm = TRUE),
+                    litters_per_year = mean(litters_per_year, na.rm = TRUE))
+    
+    reshuffled_res <- lm(genus_size~gestation_mo, data=genus_temp)
+    slope_sim <- coef(reshuffled_res)["gestation_mo"]
+    
+    # Append simulated slope to list
+    simulated_slopes[i] <- slope_sim
+}    
+
+# Unlist simulated means list into numeric vector
+simulated_slopes <- unlist(simulated_slopes)
+
+ggplot() +
+    ylab("Count") + xlab("Simulated slope") +
+    geom_histogram(aes(x = simulated_slopes), bins = 30, 
+                   fill = "grey", alpha = 0.4, colour = "black") +
+    geom_vline(xintercept = slope_real, size = 1, 
+               linetype = "dashed", colour = "black") + 
+    theme_classic()
+```
+
 
