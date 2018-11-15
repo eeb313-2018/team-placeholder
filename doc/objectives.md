@@ -1,4 +1,4 @@
-#Study objectives
+# Study objectives
 
 - How do life history traits effect diversification?
 - Do they interact with each other in creating this effect?
