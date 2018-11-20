@@ -173,7 +173,7 @@ summary(life_span_result)
 reshuffled <- mammals
 reshuffled$life_mo <- sample(reshuffled$life_mo, size = nrow(reshuffled), replace = FALSE)
 
-slope_real <- coef(result)["life_mo"]
+slope_real <- coef(life_span_result)["life_mo"]
 
 simulated_slopes <- list()
 
@@ -229,13 +229,16 @@ p_val
 
 #anova
 ```{r}
-anova(lm(genus_size~life_mo*gestation_mo*afr_mo, data = mammals3))
+anova(lm(genus_size~life_mo*gestation_mo*afr_mo*litter_size, data = mammals3))
+
+#life_mo:gestation_mo is significant
+#life_mo is significant
 ```
 
 
 #linear regression
 ```{r}
-regression <- lm(genus_size~gestation_mo, data = mammals3)
+regression <- lm(genus_size~life_mo, data = mammals3)
 ggplot(mammals3, aes(x = life_mo, y = genus_size)) +
     geom_point() +
     geom_smooth(method = "lm")
