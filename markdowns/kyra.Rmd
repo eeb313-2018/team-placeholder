@@ -117,6 +117,7 @@ summary(result)
 ```
 #randomization test
 ```{r}
+set.seed(16)
 reshuffled <- mammals_c
 reshuffled$gestation_mo <- sample(reshuffled$gestation_mo, size = nrow(reshuffled), replace = FALSE)
 
@@ -156,7 +157,7 @@ for(i in 1:nreps){
 simulated_slopes <- unlist(simulated_slopes)
 
 ggplot() +
-    ylab("Count") + xlab("Simulated slope") +
+    ylab("Count") + xlab("Simulated Slope") +
     geom_histogram(aes(x = simulated_slopes), bins = 30, 
                    fill = "grey", alpha = 0.4, colour = "black") +
     geom_vline(xintercept = slope_real, size = 1, 
@@ -175,8 +176,12 @@ p_val
 
 #anova
 ```{r}
-anova(lm(genus_size~gestation_mo*life_mo*litter_size, data=mammals_g))
+anova(lm(genus_size~mass_g+newborn_g+wean_g+afr_mo+litters_per_year+gestation_mo+life_mo+litter_size+weaning_mo+life_mo, data=mammals_g))
 ```
+```{r}
+anova(lm(genus_size~gestation_mo*life_mo*litter_size*weaning_mo*life_mo, data=mammals_g))
+```
+
 
 
 #linear regression
@@ -184,7 +189,7 @@ anova(lm(genus_size~gestation_mo*life_mo*litter_size, data=mammals_g))
 regression <- lm(genus_size~gestation_mo, data=mammals_g)
 ggplot(mammals_g, aes(x = gestation_mo, y = genus_size)) +
     geom_point() +
-    geom_smooth(method = "lm")
+    geom_smooth(method = "lm") + ylab('genus size') + xlab('months of gestation')
 ```
 #without rodents
 ```{r}
@@ -202,7 +207,7 @@ mammals_c %>%
             litters_per_year = mean(litters_per_year, na.rm = TRUE)) %>% 
   ggplot(aes(x = gestation_mo, y = genus_size)) +
     geom_point() +
-    geom_smooth(method = "lm") %>% 
+    geom_smooth(method = "lm")
   
 ```
 
