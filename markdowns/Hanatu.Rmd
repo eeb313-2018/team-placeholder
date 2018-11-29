@@ -1,0 +1,335 @@
+---
+title: "Life span + Litters per year analysis - updated"
+author: "Hanatu"
+output: html_notebook
+---
+
+
+```{r}
+mammals_c <- read.csv('mammals_clean.csv')
+mammals_g <- read.csv('mammals_genus.csv')
+mammals_o <- read.csv('mammals_order.csv')
+
+# Maximum lifespan (months) = life_mo 
+# Age of first reproduction (months) = afr_mo 
+# Gestation time (months) = gestation_mo 
+# Weaning age (months) = weaning_mo 
+# Weaning mass (grams) = wean_g 
+# Litter size (months) = litter_size 
+# Litters per year = litters_per_year
+# Newborn mass (grams) = newborn_g
+# Adult body mass (grams) = mass_g
+```
+
+```{r}
+library(tidyverse)
+```
+
+
+```{r}
+ggplot(mammals_c, aes(x = life_mo, y = order, color = Genus)) +
+    geom_point(size = 0.1, position = 'jitter') + 
+    theme(legend.position = "none")
+
+# graph shows diversification of life span in genera within their order 
+```
+
+
+#statistical analysis for life span
+
+```{r}
+ls_result <- lm(genus_size~life_mo, data = mammals_g)
+summary(ls_result)
+
+# p-val: 0.000401, significant.
+```
+
+##randomization test
+
+```{r}
+# Is the observed pattern different than what we would expect by random chance?
+set.seed(16)
+
+reshuffled <- mammals_c
+reshuffled$life_mo <- sample(reshuffled$life_mo, size = nrow(reshuffled), replace = FALSE)
+
+slope_real <- coef(ls_result)["life_mo"]
+
+simulated_slopes <- list()
+
+nreps = 5000 # 5000 iterations
+
+for(i in 1:nreps){
+    
+    reshuffled <- mammals_c
+    reshuffled$life_mo <- sample(reshuffled$life_mo, size = nrow(reshuffled),
+                                 replace = FALSE)
+    
+    # Calculate the slope
+    genus_temp <- reshuffled %>%
+          group_by(Genus) %>% 
+          summarize(genus_size = n_distinct(species),
+                    mass_g = mean(mass_g, na.rm = TRUE),
+                    gestation_mo = mean(gestation_mo, na.rm = TRUE),
+                    newborn_g = mean(newborn_g, na.rm = TRUE),
+                    weaning_mo = mean(weaning_mo, na.rm = TRUE),
+                    wean_g = mean(wean_g, na.rm = TRUE),
+                    afr_mo = mean(afr_mo, na.rm = TRUE),
+                    life_mo = mean(life_mo, na.rm = TRUE),
+                    litter_size = mean(litter_size, na.rm = TRUE),
+                    litters_per_year = mean(litters_per_year, na.rm = TRUE))
+    
+    reshuffled_res <- lm(genus_size~life_mo, data = genus_temp)
+    slope_sim <- coef(reshuffled_res)["life_mo"]
+    
+    # Append simulated slope to list
+    simulated_slopes[i] <- slope_sim
+}    
+
+# Unlist simulated means list into numeric vector
+simulated_slopes <- unlist(simulated_slopes)
+
+ggplot() +
+    ylab("Count") + xlab("Simulated slope") +
+    geom_histogram(aes(x = simulated_slopes), bins = 30, 
+                   fill = "grey", alpha = 0.4, colour = "black") +
+    geom_vline(xintercept = slope_real, size = 1, 
+               linetype = "dashed", colour = "black") + 
+    theme_classic()
+```
+
+
+```{r}
+abs_simulated_slopes <- abs(simulated_slopes)
+exceed_count <- length(abs_simulated_slopes[abs_simulated_slopes >= 
+                                               abs(slope_real)])
+p_val <- exceed_count / nreps
+p_val
+# p-val: 0.0002, significant.
+```
+
+##anova
+```{r}
+anova(lm(genus_size~life_mo*gestation_mo*afr_mo*litters_per_year, data = mammals_g))
+
+# life_mo is significant
+# gestation_mo is significant
+# litters_per_year is significant
+# life_mo:gestation_mo is significant
+# life_mo:gestation_mo:litters_per_year is significant
+```
+
+
+##linear regression
+```{r}
+regression <- lm(genus_size~life_mo, data = mammals_g)
+ggplot(mammals_g, aes(x = life_mo, y = genus_size)) +
+    geom_point() +
+    geom_smooth(method = "lm")
+```
+
+```{r}
+summary(regression)
+# p-val: 0.000401, significant.
+```
+
+
+##without rodents
+```{r}
+mammals_c %>%
+  filter(order != "Rodentia") %>% 
+  group_by(Genus) %>% 
+  summarize(genus_size = n_distinct(species),
+            mass_g = mean(mass_g, na.rm = TRUE),
+            gestation_mo = mean(gestation_mo, na.rm = TRUE),
+            newborn_g = mean(newborn_g, na.rm = TRUE),
+            weaning_mo = mean(weaning_mo, na.rm = TRUE),
+            wean_g = mean(wean_g, na.rm = TRUE),
+            afr_mo = mean(afr_mo, na.rm = TRUE),
+            life_mo = mean(life_mo, na.rm = TRUE),
+            litter_size = mean(litter_size, na.rm = TRUE),
+            litters_per_year = mean(litters_per_year, na.rm = TRUE)) %>% 
+  ggplot(aes(x = life_mo, y = genus_size)) +
+    geom_point() +
+    geom_smooth(method = "lm") 
+```
+
+```{r}
+genus_no_rod <- mammals_c %>%
+  filter(order != "Rodentia") %>% 
+  group_by(Genus) %>% 
+  summarize(genus_size = n_distinct(species),
+            mass_g = mean(mass_g, na.rm = TRUE),
+            gestation_mo = mean(gestation_mo, na.rm = TRUE),
+            newborn_g = mean(newborn_g, na.rm = TRUE),
+            weaning_mo = mean(weaning_mo, na.rm = TRUE),
+            wean_g = mean(wean_g, na.rm = TRUE),
+            afr_mo = mean(afr_mo, na.rm = TRUE),
+            life_mo = mean(life_mo, na.rm = TRUE),
+            litter_size = mean(litter_size, na.rm = TRUE),
+            litters_per_year = mean(litters_per_year, na.rm = TRUE))
+regression2 <- lm(genus_size~life_mo, data = genus_no_rod)
+summary(regression2)
+
+# p-val is 0.034, significant.
+```
+
+## q-q plot
+```{r}
+plot(lm(genus_size ~ life_mo, data = genus_temp), which = 2)
+# right-skewed
+```
+
+#statistical analysis for litters per year
+
+```{r}
+result <- lm(genus_size~litters_per_year, data = mammals_g)
+summary(lpy_result)
+
+# p-val: 0.00609, significant.
+```
+
+##randomization test
+
+```{r}
+# Is the observed pattern different than what we would expect by random chance?
+set.seed(16)
+
+reshuffled <- mammals_c
+reshuffled$litters_per_year <- sample(reshuffled$litters_per_year, size = nrow(reshuffled), replace = FALSE)
+
+slope_real <- coef(lpy_result)["litters_per_year"]
+
+simulated_slopes <- list()
+
+nreps = 5000 # 5000 iterations
+
+for(i in 1:nreps){
+    
+    reshuffled <- mammals_c
+    reshuffled$litters_per_year <- sample(reshuffled$litters_per_year, size = nrow(reshuffled),
+                                 replace = FALSE)
+    
+    # Calculate the slope
+    genus_temp <- reshuffled %>%
+          group_by(Genus) %>% 
+          summarize(genus_size = n_distinct(species),
+                    mass_g = mean(mass_g, na.rm = TRUE),
+                    gestation_mo = mean(gestation_mo, na.rm = TRUE),
+                    newborn_g = mean(newborn_g, na.rm = TRUE),
+                    weaning_mo = mean(weaning_mo, na.rm = TRUE),
+                    wean_g = mean(wean_g, na.rm = TRUE),
+                    afr_mo = mean(afr_mo, na.rm = TRUE),
+                    life_mo = mean(life_mo, na.rm = TRUE),
+                    litter_size = mean(litter_size, na.rm = TRUE),
+                    litters_per_year = mean(litters_per_year, na.rm = TRUE))
+    
+    reshuffled_res <- lm(genus_size~litters_per_year, data = genus_temp)
+    slope_sim <- coef(reshuffled_res)["litters_per_year"]
+    
+    # Append simulated slope to list
+    simulated_slopes[i] <- slope_sim
+}    
+
+# Unlist simulated means list into numeric vector
+simulated_slopes <- unlist(simulated_slopes)
+
+ggplot() +
+    ylab("Count") + xlab("Simulated slope") +
+    geom_histogram(aes(x = simulated_slopes), bins = 30, 
+                   fill = "grey", alpha = 0.4, colour = "black") +
+    geom_vline(xintercept = slope_real, size = 1, 
+               linetype = "dashed", colour = "black") + 
+    theme_classic()
+```
+
+
+```{r}
+abs_simulated_slopes <- abs(simulated_slopes)
+exceed_count <- length(abs_simulated_slopes[abs_simulated_slopes >= 
+                                               abs(slope_real)])
+p_val <- exceed_count / nreps
+p_val
+# p-val is 0, significant.
+```
+
+##anova
+```{r}
+anova(lm(genus_size~litters_per_year* life_mo*gestation_mo*afr_mo, data = mammals_g))
+
+# litters_per_year is significant
+# litters_per_year:life_mo is significant
+# life_mo is significant
+# litters_per_year:life_mo:gestation_mo is significant
+```
+
+
+##linear regression
+```{r}
+regression <- lm(genus_size~life_mo, data = mammals_g)
+ggplot(mammals3, aes(x = life_mo, y = genus_size)) +
+    geom_point() +
+    geom_smooth(method = "lm")
+```
+
+```{r}
+summary(regression)
+# p-val is 0.000401, significant.
+```
+
+
+##without rodents
+```{r}
+mammals_c %>%
+  filter(order != "Rodentia") %>% 
+  group_by(Genus) %>% 
+  summarize(genus_size = n_distinct(species),
+            mass_g = mean(mass_g, na.rm = TRUE),
+            gestation_mo = mean(gestation_mo, na.rm = TRUE),
+            newborn_g = mean(newborn_g, na.rm = TRUE),
+            weaning_mo = mean(weaning_mo, na.rm = TRUE),
+            wean_g = mean(wean_g, na.rm = TRUE),
+            afr_mo = mean(afr_mo, na.rm = TRUE),
+            life_mo = mean(life_mo, na.rm = TRUE),
+            litter_size = mean(litter_size, na.rm = TRUE),
+            litters_per_year = mean(litters_per_year, na.rm = TRUE)) %>% 
+  ggplot(aes(x = litters_per_year, y = genus_size)) +
+    geom_point() +
+    geom_smooth(method = "lm") 
+```
+
+```{r}
+genus_no_rod <- mammals_c %>%
+  filter(order != "Rodentia") %>% 
+  group_by(Genus) %>% 
+  summarize(genus_size = n_distinct(species),
+            mass_g = mean(mass_g, na.rm = TRUE),
+            gestation_mo = mean(gestation_mo, na.rm = TRUE),
+            newborn_g = mean(newborn_g, na.rm = TRUE),
+            weaning_mo = mean(weaning_mo, na.rm = TRUE),
+            wean_g = mean(wean_g, na.rm = TRUE),
+            afr_mo = mean(afr_mo, na.rm = TRUE),
+            life_mo = mean(life_mo, na.rm = TRUE),
+            litter_size = mean(litter_size, na.rm = TRUE),
+            litters_per_year = mean(litters_per_year, na.rm = TRUE))
+regression2 <- lm(genus_size~litters_per_year, data = genus_no_rod)
+summary(regression2)
+
+# p-val is 0.0128, significant.
+```
+
+## q-q plot
+```{r}
+plot(lm(genus_size ~ litters_per_year, data = genus_temp), which = 2)
+# right-skewed
+```
+
+
+
+
+
+
+
+
+
+
