@@ -289,21 +289,19 @@ summary(regression5)
 
 
 ```{r}
-result <- lm(genus_size~litter_size, data=mammals_g)
+result <- lm(genus_size~life_mo, data=mammals_g)
 summary(result)
-```
 
-```{r}
 set.seed(16)
 reshuffled <- mammals_c
-reshuffled$litter_size <- sample(reshuffled$litter_size, size = nrow(reshuffled), replace = FALSE)
-slope_real <- coef(result)["litter_size"]
+reshuffled$life_mo <- sample(reshuffled$life_mo, size = nrow(reshuffled), replace = FALSE)
+slope_real <- coef(result)["life_mo"]
 simulated_slopes <- list()
 nreps = 5000
 for(i in 1:nreps){
   
   reshuffled <- mammals_c
-  reshuffled$litter_size <- sample(reshuffled$litter_size, size = nrow(reshuffled),
+  reshuffled$life_mo <- sample(reshuffled$life_mo, size = nrow(reshuffled),
                                     replace = FALSE)
   
   # Calculate the slope
@@ -319,8 +317,8 @@ for(i in 1:nreps){
               litter_size = mean(litter_size, na.rm = TRUE),
               litters_per_year = mean(litters_per_year, na.rm = TRUE))
   
-  reshuffled_res <- lm(genus_size~litter_size, data=genus_temp)
-  slope_sim <- coef(reshuffled_res)["litter_size"]
+  reshuffled_res <- lm(genus_size~life_mo, data=genus_temp)
+  slope_sim <- coef(reshuffled_res)["life_mo"]
   
   # Append simulated slope to list
   simulated_slopes[i] <- slope_sim
@@ -331,7 +329,7 @@ for(i in 1:nreps){
 
 simulated_slopes <- unlist(simulated_slopes)
 ggplot() +
-    ylab("Count") + xlab("Simulated Slope") +
+    ylab("Count") + xlab("Simulated Slope,life_mos") +
     geom_histogram(aes(x = simulated_slopes), bins = 30, 
                    fill = "grey", alpha = 0.4, colour = "black") +
     geom_vline(xintercept = slope_real, size = 1, 
