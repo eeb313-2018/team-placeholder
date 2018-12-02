@@ -4,6 +4,7 @@ output: html_document
 ---
 
 ```{r}
+#loading in dataset variants for species genus and order level as well as tidyverse package
 mammals_c <- read.csv('mammals_clean.csv')
 mammals_g <- read.csv('mammals_genus.csv')
 mammals_o <- read.csv('mammals_order.csv')
@@ -11,6 +12,7 @@ mammals_o <- read.csv('mammals_order.csv')
 library(tidyverse)
 ```
 
+#initial data exploration, before datasets for order and genus levels were created
 ```{r}
 qplot(data = mammals, x = newborn.g., y = max..life.mo.)
 ```
@@ -22,6 +24,7 @@ qplot(data = mammals, x = litter.size, y = max..life.mo.) + coord_cartesian(xlim
 qplot(data = mammals, x = litter.size, y = max..life.mo.) + coord_cartesian(xlim = c(0,50), ylim = c(0,1000))
 ```
 
+#cleaning data and creating genus and order level datasets
 ```{r}
 colnames(mammals)[colnames(mammals)=="litters.year"] <- "litters_per_year"
 
@@ -109,13 +112,13 @@ write.csv(mammals2, "mammals_order.csv")
 write.csv(mammals3, "mammals_genus.csv")
 ```
 
-#statistical analysis for gestation mass
-
+#statistical analysis for gestation time
+##linear regression
 ```{r}
 result <- lm(genus_size~gestation_mo, data=mammals_g)
 summary(result)
 ```
-#randomization test
+##randomization test
 ```{r}
 set.seed(16)
 reshuffled <- mammals_c
@@ -162,7 +165,8 @@ ggplot() +
                    fill = "grey", alpha = 0.4, colour = "black") +
     geom_vline(xintercept = slope_real, size = 1, 
                linetype = "dashed", colour = "black") + 
-    theme_classic()
+    theme_classic() +ggtitle("Months of Gestation")
+  ggsave("rantestgest.png")
 ```
 
 
@@ -174,24 +178,25 @@ p_val <- exceed_count / nreps
 p_val
 ```
 
-#anova
+##anova
 ```{r}
-anova(lm(genus_size~mass_g+newborn_g+wean_g+afr_mo+litters_per_year+gestation_mo+life_mo+litter_size+weaning_mo+life_mo, data=mammals_g))
+#multifactor for looking at which factors we might might want to focus on 
+anova(lm(genus_size~mass_g+newborn_g+wean_g+afr_mo+litters_per_year+gestation_mo+life_mo+litter_size+weaning_mo, data=mammals_g))
 ```
 ```{r}
-anova(lm(genus_size~gestation_mo*life_mo*litter_size*weaning_mo*life_mo, data=mammals_g))
+anova(lm(genus_size~litters_per_year*life_mo*gestation_mo*afr_mo, data=mammals_g))
 ```
 
 
 
-#linear regression
+#linear regression plot
 ```{r}
 regression <- lm(genus_size~gestation_mo, data=mammals_g)
 ggplot(mammals_g, aes(x = gestation_mo, y = genus_size)) +
     geom_point() +
     geom_smooth(method = "lm") + ylab('genus size') + xlab('months of gestation')
 ```
-#without rodents
+#initial drop-one test focussing on rodents
 ```{r}
 mammals_c %>%
   filter(order != "Rodentia") %>% 
@@ -224,11 +229,11 @@ genus_no_rod <- mammals_c %>%
             life_mo = mean(life_mo, na.rm = TRUE),
             litter_size = mean(litter_size, na.rm = TRUE),
             litters_per_year = mean(litters_per_year, na.rm = TRUE))
-regression2 <- lm(genus_size~gestation_mo, data=genus_no_rod)
+regression2 <- lm(genus_size~life_mo, data=genus_no_rod)
 summary(regression2)
 ```
 
-#drop one
+#drop one tests using other orders
 ```{r}
 genus_no_cet <- mammals_c %>%
   filter(order != "Cetacia") %>% 
@@ -242,7 +247,7 @@ genus_no_cet <- mammals_c %>%
             life_mo = mean(life_mo, na.rm = TRUE),
             litter_size = mean(litter_size, na.rm = TRUE),
             litters_per_year = mean(litters_per_year, na.rm = TRUE))
-regression3 <- lm(genus_size~gestation_mo, data=genus_no_cet)
+regression3 <- lm(genus_size~life_mo, data=genus_no_cet)
 summary(regression3)
 ```
 
@@ -260,9 +265,10 @@ genus_no_per <- mammals_c %>%
             litter_size = mean(litter_size, na.rm = TRUE),
             litters_per_year = mean(litters_per_year, na.rm = TRUE))
 
-
-anova(lm(genus_size~gestation_mo*litter_size, data=genus_no_per))
+regression3 <- lm(genus_size~life_mo, data=genus_no_per)
+summary(regression3)
 ```
+
 
 
 
@@ -279,7 +285,7 @@ genus_no_prim <- mammals_c %>%
             life_mo = mean(life_mo, na.rm = TRUE),
             litter_size = mean(litter_size, na.rm = TRUE),
             litters_per_year = mean(litters_per_year, na.rm = TRUE))
-regression5 <- lm(genus_size~gestation_mo, data=genus_no_prim)
+regression5 <- lm(genus_size~life_mo, data=genus_no_prim)
 summary(regression5)
 ```
 
@@ -287,7 +293,7 @@ summary(regression5)
 
 
 
-
+#randomization test for lifespan
 ```{r}
 result <- lm(genus_size~life_mo, data=mammals_g)
 summary(result)
@@ -334,7 +340,8 @@ ggplot() +
                    fill = "grey", alpha = 0.4, colour = "black") +
     geom_vline(xintercept = slope_real, size = 1, 
                linetype = "dashed", colour = "black") + 
-    theme_classic()
+    theme_classic() +ggtitle("Lifespan in Months")
+  ggsave("rantestage.png")
 
 
 abs_simulated_slopes <- abs(simulated_slopes)
