@@ -1488,5 +1488,3 @@ ggplot(mammals_c, aes(x = life_mo, y = order, color = Genus)) +
     geom_point(size = 0.1, position = 'jitter') + 
     theme(legend.position = "none")
 ```
-
-
